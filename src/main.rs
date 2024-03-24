@@ -1,17 +1,20 @@
-mod element;
-
+use crate::{
+    apps::logbox::logbox_test,
+    element::SomeAction,
+    elements::{ActionButton, ActionButtonState},
+    instance::Instance,
+};
 use actix_web::{
     get,
     web::{self, Redirect},
     App, HttpResponse, HttpServer, Responder,
 };
 use base64::Engine;
-use element::{
-    Div, LogBox, LogBoxAction, LogBoxState, Paragraph, ParagraphState, Root, SomeElement,
-};
-use crate::{apps::{logbox::logbox_test}, element::{ActionButton, ActionButtonState, SomeAction}, instance::Instance};
+use elements::{Div, LogBox, LogBoxAction, LogBoxState, Paragraph, ParagraphState, Root};
 
 mod apps;
+mod element;
+mod elements;
 mod instance;
 
 #[get("/action/{id}/{action}/{instance}")]

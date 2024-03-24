@@ -2,7 +2,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::element::{Element, ElementId, SomeAction, SomeElement};
 
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Instance {
     pub id_accumulator: ElementId,

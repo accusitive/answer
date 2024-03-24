@@ -1,5 +1,6 @@
+use crate::element::{SomeAction, SomeElement};
+use crate::elements::*;
 use crate::instance::Instance;
-use crate::element::*;
 
 pub fn logbox_test() -> Instance {
     let mut instance = Instance::new();
