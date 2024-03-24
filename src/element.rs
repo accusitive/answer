@@ -1,7 +1,7 @@
 use base64::Engine;
 use serde::{Deserialize, Serialize};
 
-use crate::{Instance, SomeAction, SomeElement};
+use crate::instance::Instance;
 
 pub type ElementId = u64;
 
@@ -287,4 +287,42 @@ impl Element for Root {
                 .join(""),
         )
     }
+}
+
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum SomeElement {
+    ActionButton(ActionButton),
+    ParagraphOrBold(ParagraphOrBold),
+    Paragraph(Paragraph),
+    LogBox(LogBox),
+    Div(Div),
+    Root(Root),
+}
+impl SomeElement {
+    pub fn get_id(&self) -> ElementId {
+        match self {
+            SomeElement::ActionButton(action_button) => action_button.id,
+            SomeElement::ParagraphOrBold(paragraph_or_bold) => paragraph_or_bold.id,
+            SomeElement::Paragraph(paragraph) => paragraph.id,
+            SomeElement::LogBox(logbox) => logbox.id,
+            SomeElement::Div(div) => div.id,
+            SomeElement::Root(root) => root.id,
+        }
+    }
+    pub fn render(&self, instance: &Instance) -> String {
+        match self {
+            SomeElement::ActionButton(action_button) => action_button.render(&instance),
+            SomeElement::ParagraphOrBold(paragraph_or_bold) => paragraph_or_bold.render(&instance),
+            SomeElement::Paragraph(paragraph) => paragraph.render(&instance),
+            SomeElement::LogBox(logbox) => logbox.render(&instance),
+            SomeElement::Div(div) => div.render(&instance),
+            SomeElement::Root(root) => root.render(&instance),
+        }
+    }
+}
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum SomeAction {
+    ParagraphOrBold(ParagraphOrBoldAction),
+    LogBox(LogBoxAction),
 }
