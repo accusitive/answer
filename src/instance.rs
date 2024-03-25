@@ -1,7 +1,8 @@
 use serde::{Deserialize, Serialize};
 
-use crate::element::{Element, ElementId, SomeAction};
+use crate::element::{Action, Element, ElementId};
 pub type SomeElement = Box<dyn Element>;
+pub type SomeAction = Box<dyn Action>;
 
 #[derive(Serialize, Deserialize)]
 pub struct Instance {
@@ -72,5 +73,3 @@ impl Instance {
         id
     }
 }
-
-

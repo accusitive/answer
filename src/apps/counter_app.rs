@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    element::{Element, ElementId, SomeAction},
+    element::{Action, Element, ElementId},
     elements::*,
     instance::Instance,
 };
@@ -58,7 +58,7 @@ impl Counter {
             state: ActionButtonState {
                 value: "+".to_string(),
                 effects: this,
-                action: SomeAction::Counter(CounterAction::Increment),
+                action: Box::new(CounterAction::Increment),
             },
         };
         let remove = ActionButton {
@@ -66,7 +66,7 @@ impl Counter {
             state: ActionButtonState {
                 value: "-".to_string(),
                 effects: this,
-                action: SomeAction::Counter(CounterAction::Decrement),
+                action: Box::new(CounterAction::Decrement),
             },
         };
         let reset = ActionButton {
@@ -74,7 +74,7 @@ impl Counter {
             state: ActionButtonState {
                 value: "0".to_string(),
                 effects: this,
-                action: SomeAction::Counter(CounterAction::Zero),
+                action: Box::new(CounterAction::Zero),
             },
         };
 
@@ -98,6 +98,13 @@ pub enum CounterAction {
     Decrement,
     Zero,
 }
+#[typetag::serde]
+impl Action for CounterAction {
+    fn as_any(&mut self) -> &mut dyn std::any::Any {
+        self
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Counters {
     pub id: ElementId,
@@ -114,15 +121,22 @@ pub enum CountersAction {
     RemoveCounter(usize),
 }
 #[typetag::serde]
+impl Action for CountersAction {
+    fn as_any(&mut self) -> &mut dyn std::any::Any {
+        self
+    }
+}
+
+#[typetag::serde]
 
 impl Element for Counter {
-
     fn get_id(&self) -> ElementId {
         self.id
     }
 
-    fn update(&mut self, action: Vec<u8>) -> Option<()>{
-        let action = Self::parse_action(action)?;
+    fn update(&mut self, action: Vec<u8>) -> Option<()> {
+        let mut action = self.parse_action(action)?;
+        let action = action.as_any().downcast_ref::<CounterAction>()?;
         match action {
             CounterAction::Increment => self.state.count += 1,
             CounterAction::Decrement if self.state.count > 0 => self.state.count -= 1,
@@ -141,7 +155,7 @@ impl Element for Counter {
             instance.render_element(self.reset)
         )
     }
-    
+
     fn as_any(&self) -> &dyn std::any::Any {
         self
     }
@@ -149,18 +163,17 @@ impl Element for Counter {
 #[typetag::serde]
 
 impl Element for Counters {
-
     fn get_id(&self) -> ElementId {
         self.id
     }
 
-
     fn update(&mut self, action: Vec<u8>) -> Option<()> {
-        let action = Self::parse_action(action)?;
+        let mut action = self.parse_action(action)?;
+        let action = action.as_any().downcast_mut::<CountersAction>()?;
         match action {
             CountersAction::Reset => todo!(),
             CountersAction::RemoveCounter(index) => {
-                self.state.counters.remove(index);
+                self.state.counters.remove(*index);
             }
         }
         Some(())
@@ -173,7 +186,13 @@ impl Element for Counters {
             .iter()
             .map(|counter| instance.get_element(counter).unwrap())
             .filter(|counter| {
-                counter.as_any().downcast_ref::<Counter>().expect("Child of counters is not a counter").state.count > 0
+                counter
+                    .as_any()
+                    .downcast_ref::<Counter>()
+                    .expect("Child of counters is not a counter")
+                    .state
+                    .count
+                    > 0
             })
             .collect::<Vec<_>>()
             .len();
@@ -189,7 +208,7 @@ impl Element for Counters {
                 .join(" ")
         )
     }
-    
+
     fn as_any(&self) -> &dyn std::any::Any {
         self
     }

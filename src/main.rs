@@ -1,7 +1,3 @@
-use crate::{
-    element::SomeAction,
-    instance::Instance,
-};
 use actix_web::{
     get,
     web::{self, Redirect},
@@ -9,6 +5,7 @@ use actix_web::{
 };
 use base64::Engine;
 
+use crate::instance::Instance;
 
 mod apps;
 mod element;
@@ -24,7 +21,7 @@ async fn handle_action(path: web::Path<(u64, String, String)>) -> impl Responder
             .unwrap();
 
         // let some_action =
-            // serde_json::from_slice::<SomeAction>(&action_decoded).expect("Invalid JSON");
+        // serde_json::from_slice::<SomeAction>(&action_decoded).expect("Invalid JSON");
 
         let instance = base64::engine::general_purpose::STANDARD
             .decode(instance)
@@ -70,10 +67,13 @@ async fn greet(instance: web::Path<String>) -> HttpResponse {
     if MINIMIZE {
         let size = minify_html_onepass::in_place(unsafe { body.as_bytes_mut() }, &c).unwrap();
         let body = body.split_at_mut(size).0.to_string();
-        HttpResponse::Ok().content_type("text/html; charset=utf-8").body(body)
+        HttpResponse::Ok()
+            .content_type("text/html; charset=utf-8")
+            .body(body)
     } else {
-        HttpResponse::Ok().content_type("text/html; charset=utf-8").body(body)
-
+        HttpResponse::Ok()
+            .content_type("text/html; charset=utf-8")
+            .body(body)
     }
 }
 
