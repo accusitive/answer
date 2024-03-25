@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    element::{Element, ElementId, SomeAction, SomeElement},
+    element::{Element, ElementId, SomeAction},
     elements::*,
     instance::Instance,
 };
@@ -27,15 +27,15 @@ pub fn counter_app() -> Instance {
     };
 
     for counter in counter_instances {
-        i.register_element(SomeElement::Counter(counter));
+        i.register_element(counter);
     }
-    let c = i.register_element(SomeElement::Counters(counters));
+    let c = i.register_element(counters);
     let root = Root {
         id: i.next_id(),
         head_chilren: vec![],
         body_children: vec![c],
     };
-    i.root = i.register_element(SomeElement::Root(root));
+    i.root = i.register_element(root);
 
     i
 }
@@ -81,9 +81,9 @@ impl Counter {
         Self {
             id: this,
             state: CounterState { count: 0 },
-            add: instance.register_element(SomeElement::ActionButton(add)),
-            remove: instance.register_element(SomeElement::ActionButton(remove)),
-            reset: instance.register_element(SomeElement::ActionButton(reset)),
+            add: instance.register_element(add),
+            remove: instance.register_element(remove),
+            reset: instance.register_element(reset),
         }
     }
 }
@@ -113,26 +113,23 @@ pub enum CountersAction {
     Reset,
     RemoveCounter(usize),
 }
+#[typetag::serde]
 
 impl Element for Counter {
-    type State = CounterState;
-    type Action = CounterAction;
 
     fn get_id(&self) -> ElementId {
         self.id
     }
 
-    fn state(&self) -> &Self::State {
-        &self.state
-    }
-
-    fn update(&mut self, action: Self::Action) {
+    fn update(&mut self, action: Vec<u8>) -> Option<()>{
+        let action = Self::parse_action(action)?;
         match action {
             CounterAction::Increment => self.state.count += 1,
             CounterAction::Decrement if self.state.count > 0 => self.state.count -= 1,
 
             CounterAction::Decrement | CounterAction::Zero => self.state.count = 0,
         }
+        Some(())
     }
 
     fn render(&self, instance: &Instance) -> String {
@@ -144,26 +141,29 @@ impl Element for Counter {
             instance.render_element(self.reset)
         )
     }
+    
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
+#[typetag::serde]
+
 impl Element for Counters {
-    type State = CountersState;
-    type Action = CountersAction;
 
     fn get_id(&self) -> ElementId {
         self.id
     }
 
-    fn state(&self) -> &Self::State {
-        &self.state
-    }
 
-    fn update(&mut self, action: Self::Action) {
+    fn update(&mut self, action: Vec<u8>) -> Option<()> {
+        let action = Self::parse_action(action)?;
         match action {
             CountersAction::Reset => todo!(),
             CountersAction::RemoveCounter(index) => {
                 self.state.counters.remove(index);
             }
         }
+        Some(())
     }
 
     fn render(&self, instance: &Instance) -> String {
@@ -173,11 +173,7 @@ impl Element for Counters {
             .iter()
             .map(|counter| instance.get_element(counter).unwrap())
             .filter(|counter| {
-                if let SomeElement::Counter(counter) = counter {
-                    counter.state.count > 0
-                } else {
-                    false
-                }
+                counter.as_any().downcast_ref::<Counter>().expect("Child of counters is not a counter").state.count > 0
             })
             .collect::<Vec<_>>()
             .len();
@@ -192,5 +188,9 @@ impl Element for Counters {
                 .collect::<Vec<_>>()
                 .join(" ")
         )
+    }
+    
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
     }
 }

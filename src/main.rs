@@ -22,15 +22,17 @@ async fn handle_action(path: web::Path<(u64, String, String)>) -> impl Responder
         let action_decoded = base64::engine::general_purpose::STANDARD
             .decode(action.clone())
             .unwrap();
-        let some_action =
-            serde_json::from_slice::<SomeAction>(&action_decoded).expect("Invalid JSON");
+
+        // let some_action =
+            // serde_json::from_slice::<SomeAction>(&action_decoded).expect("Invalid JSON");
 
         let instance = base64::engine::general_purpose::STANDARD
             .decode(instance)
             .unwrap();
         let mut instance = serde_json::from_slice::<Instance>(&instance).expect("Invalid JSON");
 
-        instance.handle_action(id, some_action);
+        instance.handle_action(id, action_decoded);
+        // instance.handle_action(id, some_action);
         Redirect::to(format!(
             "/instance/{}",
             &base64::engine::general_purpose::STANDARD

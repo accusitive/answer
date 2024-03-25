@@ -16,14 +16,9 @@ pub struct Paragraph {
 pub struct ParagraphState {
     pub text: String,
 }
+#[typetag::serde]
 impl Element for Paragraph {
-    type State = ParagraphState;
-    type Action = ();
-
-    fn state(&self) -> &Self::State {
-        &self.state
-    }
-    fn update(&mut self, _action: Self::Action) {
+    fn update(&mut self, _action: Vec<u8>) -> Option<()> {
         unreachable!()
     }
 
@@ -33,6 +28,10 @@ impl Element for Paragraph {
 
     fn get_id(&self) -> ElementId {
         self.id
+    }
+    
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
     }
 }
 #[derive(Debug, Serialize, Deserialize)]
@@ -49,13 +48,9 @@ pub struct ActionButtonState {
     pub action: SomeAction, // pub action: Action
                             // TODO: pub action_id: i32
 }
+#[typetag::serde]
 impl Element for ActionButton {
-    type State = ActionButtonState;
-    type Action = ();
-    fn state(&self) -> &Self::State {
-        &self.state
-    }
-    fn update(&mut self, _action: Self::Action) {
+    fn update(&mut self, _action: Vec<u8>) -> Option<()> {
         unreachable!()
     }
     fn render(&self, instance: &Instance) -> String {
@@ -86,6 +81,10 @@ impl Element for ActionButton {
     fn get_id(&self) -> ElementId {
         self.id
     }
+    
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
 #[derive(Debug, Serialize, Deserialize)]
 
@@ -104,19 +103,14 @@ pub struct ParagraphOrBoldState {
 pub enum ParagraphOrBoldAction {
     ToggleBold,
 }
+#[typetag::serde]
 impl Element for ParagraphOrBold {
-    type State = ParagraphOrBoldState;
-
-    type Action = ParagraphOrBoldAction;
-
-    fn state(&self) -> &Self::State {
-        &self.state
-    }
-
-    fn update(&mut self, action: Self::Action) {
+    fn update(&mut self, action: Vec<u8>) -> Option<()> {
+        let action = Self::parse_action(action)?;
         match action {
             ParagraphOrBoldAction::ToggleBold => self.state.bold = !self.state.bold,
         }
+        Some(())
     }
 
     fn render(&self, _instance: &Instance) -> String {
@@ -127,6 +121,10 @@ impl Element for ParagraphOrBold {
     }
     fn get_id(&self) -> ElementId {
         self.id
+    }
+    
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
     }
 }
 
@@ -147,21 +145,16 @@ pub enum LogBoxAction {
     ReplaceLog(usize, String),
     ClearLogs,
 }
-
+#[typetag::serde]
 impl Element for LogBox {
-    type State = LogBoxState;
-
-    type Action = LogBoxAction;
 
     fn get_id(&self) -> ElementId {
         self.id
     }
 
-    fn state(&self) -> &Self::State {
-        &self.state
-    }
 
-    fn update(&mut self, action: Self::Action) {
+    fn update(&mut self, action: Vec<u8>) -> Option<()>{
+        let action = Self::parse_action(action)?;
         match action {
             LogBoxAction::AddLog(log) => self.state.logs.push(log),
             LogBoxAction::RemoveLog(index) => {
@@ -170,10 +163,15 @@ impl Element for LogBox {
             LogBoxAction::ReplaceLog(index, log) => self.state.logs[index] = log,
             LogBoxAction::ClearLogs => self.state.logs.clear(),
         }
+        Some(())
     }
 
     fn render(&self, _instance: &Instance) -> String {
         format!("<div>{}</div>", self.state.logs.join("<br>"))
+    }
+    
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
     }
 }
 #[derive(Debug, Serialize, Deserialize)]
@@ -183,20 +181,16 @@ pub struct Div {
     pub children: Vec<ElementId>,
     pub kind: DivKind,
 }
+#[typetag::serde]
 impl Element for Div {
-    type State = ();
-
-    type Action = ();
-
     fn get_id(&self) -> ElementId {
         self.id
     }
 
-    fn state(&self) -> &Self::State {
-        &()
-    }
 
-    fn update(&mut self, _: Self::Action) {}
+    fn update(&mut self, _: Vec<u8>) -> Option<()>{
+        unreachable!()
+    }
 
     fn render(&self, instance: &Instance) -> String {
         format!(
@@ -208,6 +202,10 @@ impl Element for Div {
                 .collect::<Vec<String>>()
                 .join("")
         )
+    }
+    
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
     }
 }
 
@@ -233,20 +231,17 @@ pub struct Root {
     pub head_chilren: Vec<ElementId>,
     pub body_children: Vec<ElementId>,
 }
+#[typetag::serde]
 impl Element for Root {
-    type State = ();
-
-    type Action = ();
 
     fn get_id(&self) -> ElementId {
         self.id
     }
 
-    fn state(&self) -> &Self::State {
-        &()
-    }
 
-    fn update(&mut self, _: Self::Action) {}
+    fn update(&mut self, _: Vec<u8>) -> Option<()> {
+        unreachable!()
+    }
     fn render(&self, _instance: &Instance) -> String {
         format!(
             r#"
@@ -274,5 +269,9 @@ impl Element for Root {
                 .collect::<Vec<String>>()
                 .join(""),
         )
+    }
+    
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
     }
 }

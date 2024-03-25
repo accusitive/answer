@@ -6,9 +6,11 @@ edition = "2021"
 [dependencies]
 actix-web = "4"
 base64 = "0.22.0"
+erased-serde = "0.4.4"
 futures-util = "0.3.30"
 minify-html = "0.15.0"
 minify-html-onepass = "0.15.0"
 ordered_hashmap = "0.0.3"
 serde = { version = "1.0.197", features = ["derive"] }
 serde_json = "1.0.114"
+typetag = "0.2.16"
