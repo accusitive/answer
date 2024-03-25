@@ -1,7 +1,5 @@
 use crate::{
-    apps::logbox::logbox_test,
     element::SomeAction,
-    elements::{ActionButton, ActionButtonState},
     instance::Instance,
 };
 use actix_web::{
@@ -10,7 +8,7 @@ use actix_web::{
     App, HttpResponse, HttpServer, Responder,
 };
 use base64::Engine;
-use elements::{Div, LogBox, LogBoxAction, LogBoxState, Paragraph, ParagraphState, Root};
+
 
 mod apps;
 mod element;
@@ -59,20 +57,21 @@ async fn greet(instance: web::Path<String>) -> HttpResponse {
         .unwrap();
     let instance = serde_json::from_slice::<Instance>(&instance).expect("Invalid JSON");
 
-    let mut body = instance.render().replace(
-        "$INSTANCE",
-        &base64::engine::general_purpose::STANDARD
-            .encode(serde_json::to_string(&instance).unwrap()),
-    );
+    let mut body = instance.render();
+    // let mut body = instance.render().replace(
+    //     "$INSTANCE",
+    //     ,
+    // );
     let c = minify_html_onepass::Cfg {
         ..Default::default()
     };
     if MINIMIZE {
         let size = minify_html_onepass::in_place(unsafe { body.as_bytes_mut() }, &c).unwrap();
         let body = body.split_at_mut(size).0.to_string();
-        HttpResponse::Ok().body(body)
+        HttpResponse::Ok().content_type("text/html; charset=utf-8").body(body)
     } else {
-        HttpResponse::Ok().body(body)
+        HttpResponse::Ok().content_type("text/html; charset=utf-8").body(body)
+
     }
 }
 

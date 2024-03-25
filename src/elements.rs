@@ -58,12 +58,14 @@ impl Element for ActionButton {
     fn update(&mut self, _action: Self::Action) {
         unreachable!()
     }
-    fn render(&self, _instance: &Instance) -> String {
+    fn render(&self, instance: &Instance) -> String {
         let action = base64::engine::general_purpose::STANDARD
             .encode(serde_json::to_string(&self.state.action).unwrap());
+        let ins = &base64::engine::general_purpose::STANDARD
+            .encode(serde_json::to_string(&instance).unwrap());
 
         format!(
-            r#"<form style="margin: 0; padding: 0;" method="get" action="/action/{}/{}/$INSTANCE">
+            r#"<form style="margin: 0; padding: 0;" method="get" action="/action/{}/{}/{}">
         <input
           value="{}"
           type="submit"
@@ -78,7 +80,7 @@ impl Element for ActionButton {
           "
         >
       </form>"#,
-            self.state.effects, action, self.state.value
+            self.state.effects, action, ins, self.state.value, 
         )
     }
     fn get_id(&self) -> ElementId {

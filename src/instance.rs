@@ -38,7 +38,9 @@ impl Instance {
                 element.update(action)
             }
             (SomeElement::LogBox(element), SomeAction::LogBox(action)) => element.update(action),
-            _ => unreachable!(),
+            (SomeElement::Counter(element), SomeAction::Counter(action)) => element.update(action),
+            (SomeElement::ParagraphOrBold(_), _) | (SomeElement::LogBox(_), _) | (SomeElement::Counter(_), _) => unreachable!(),
+            _ => todo!()
         }
     }
     pub fn get_element_mut(&mut self, id: &ElementId) -> Option<&mut SomeElement> {
@@ -53,7 +55,10 @@ impl Instance {
             .find(|element: &&(u64, SomeElement)| element.0 == *id)
             .map(|(_id, ele)| ele)
     }
-    pub fn register_element(&mut self, element: SomeElement) {
+    pub fn register_element(&mut self, element: SomeElement) -> ElementId {
+        let id = element.get_id();
         self.elements.push((element.get_id(), element));
+
+        id
     }
 }

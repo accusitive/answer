@@ -1,4 +1,5 @@
-use crate::elements::*;
+use crate::apps::counter_app::{CounterAction, Counters};
+use crate::{apps::counter_app::Counter, elements::*};
 use crate::instance::Instance;
 use serde::{Deserialize, Serialize};
 
@@ -24,6 +25,9 @@ pub enum SomeElement {
     LogBox(LogBox),
     Div(Div),
     Root(Root),
+
+    Counter(Counter),
+    Counters(Counters)
 }
 impl SomeElement {
     pub fn get_id(&self) -> ElementId {
@@ -34,6 +38,9 @@ impl SomeElement {
             SomeElement::LogBox(logbox) => logbox.id,
             SomeElement::Div(div) => div.id,
             SomeElement::Root(root) => root.id,
+            SomeElement::Counter(counter) => counter.id,
+            SomeElement::Counters(counters) => counters.id,
+            
         }
     }
     pub fn render(&self, instance: &Instance) -> String {
@@ -44,6 +51,9 @@ impl SomeElement {
             SomeElement::LogBox(logbox) => logbox.render(&instance),
             SomeElement::Div(div) => div.render(&instance),
             SomeElement::Root(root) => root.render(&instance),
+            SomeElement::Counter(counter) => counter.render(&instance),
+            SomeElement::Counters(counters) => counters.render(&instance),
+            
         }
     }
 }
@@ -51,4 +61,5 @@ impl SomeElement {
 pub enum SomeAction {
     ParagraphOrBold(ParagraphOrBoldAction),
     LogBox(LogBoxAction),
+    Counter(CounterAction)
 }
