@@ -9,7 +9,7 @@ use crate::{
 };
 
 #[derive(Debug, Serialize, Deserialize)]
-
+#[must_use]
 pub struct ActionButton {
     pub id: ElementId,
     pub state: ActionButtonState,
@@ -19,13 +19,12 @@ pub struct ActionButton {
 pub struct ActionButtonState {
     pub value: String,
     pub effects: ElementId,
-    pub action: SomeAction, // pub action: Action
-                            // TODO: pub action_id: i32
+    pub action: SomeAction,
 }
 
 #[typetag::serde]
 impl Element for ActionButton {
-    fn update(&mut self, _action: Vec<u8>) -> Option<()> {
+    fn handle_action(&mut self, _action: SomeAction) -> Option<()> {
         unreachable!()
     }
     fn render(&self, instance: &Instance) -> String {
@@ -63,6 +62,7 @@ impl Element for ActionButton {
     }
 }
 #[derive(Debug, Serialize, Deserialize)]
+#[must_use]
 
 pub struct Div {
     pub id: ElementId,
@@ -75,7 +75,7 @@ impl Element for Div {
         self.id
     }
 
-    fn update(&mut self, _: Vec<u8>) -> Option<()> {
+    fn handle_action(&mut self, _: SomeAction) -> Option<()> {
         unreachable!()
     }
 
@@ -112,6 +112,7 @@ impl ToString for DivKind {
     }
 }
 #[derive(Debug, Serialize, Deserialize)]
+#[must_use]
 
 pub struct Root {
     pub id: ElementId,
@@ -124,24 +125,24 @@ impl Element for Root {
         self.id
     }
 
-    fn update(&mut self, _: Vec<u8>) -> Option<()> {
+    fn handle_action(&mut self, _: SomeAction) -> Option<()> {
         unreachable!()
     }
     fn render(&self, _instance: &Instance) -> String {
         format!(
             r#"
-        <!DOCTYPE html>
-        <html lang="en">
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        
-        <head>
-            {}
-        </head>
-        <body>
-            {}
-        </body>
-        </html>
+<!DOCTYPE html>
+<html lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <head>
+        {}
+    </head>
+    <body>
+        {}
+    </body>
+</html>
         "#,
             self.head_chilren
                 .iter()

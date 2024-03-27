@@ -258,12 +258,23 @@ name = "answer"
 version = "0.1.0"
 dependencies = [
  "actix-web",
+ "answer_eas",
  "base64 0.22.0",
  "erased-serde",
  "futures-util",
  "minify-html",
  "minify-html-onepass",
  "ordered_hashmap",
+ "serde",
+ "serde_json",
+ "typetag",
+]
+
+[[package]]
+name = "answer_eas"
+version = "0.1.0"
+dependencies = [
+ "base64 0.22.0",
  "serde",
  "serde_json",
  "typetag",

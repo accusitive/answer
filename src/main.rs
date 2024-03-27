@@ -3,14 +3,10 @@ use actix_web::{
     web::{self, Redirect},
     App, HttpResponse, HttpServer, Responder,
 };
+use answer_eas::instance::Instance;
 use base64::Engine;
 
-use crate::instance::Instance;
-
 mod apps;
-mod element;
-mod elements;
-mod instance;
 
 #[get("/action/{id}/{action}/{instance}")]
 async fn handle_action(path: web::Path<(u64, String, String)>) -> impl Responder {
@@ -20,16 +16,13 @@ async fn handle_action(path: web::Path<(u64, String, String)>) -> impl Responder
             .decode(action.clone())
             .unwrap();
 
-        // let some_action =
-        // serde_json::from_slice::<SomeAction>(&action_decoded).expect("Invalid JSON");
-
         let instance = base64::engine::general_purpose::STANDARD
             .decode(instance)
             .unwrap();
         let mut instance = serde_json::from_slice::<Instance>(&instance).expect("Invalid JSON");
 
         instance.handle_action(id, action_decoded);
-        // instance.handle_action(id, some_action);
+
         Redirect::to(format!(
             "/instance/{}",
             &base64::engine::general_purpose::STANDARD
@@ -89,62 +82,3 @@ async fn main() -> std::io::Result<()> {
     .run()
     .await
 }
-
-// fn bold_test() -> Instance {
-//     let mut instance = Instance::new();
-//     let p = Paragraph {
-//         id: instance.next_id(),
-//         state: ParagraphState {
-//             text: format!("Pressing either of these buttons will toggle the boldness of their respective paragraps.")
-//         }
-//     };
-
-//     let pob = ParagraphOrBold {
-//         id: instance.next_id(),
-//         state: ParagraphOrBoldState {
-//             text: "First Bold or paragraph".to_string(),
-//             bold: true,
-//         },
-//     };
-//     let pob2 = ParagraphOrBold {
-//         id: instance.next_id(),
-//         state: ParagraphOrBoldState {
-//             text: "Second Bold or paragraph".to_string(),
-//             bold: true,
-//         },
-//     };
-//     let ab = ActionButton {
-//         id: instance.next_id(),
-//         state: ActionButtonState {
-//             value: "First".to_string(),
-//             effects: pob.id,
-//             action: SomeAction::ParagraphOrBold(ParagraphOrBoldAction::ToggleBold),
-//         },
-//     };
-//     let ab2 = ActionButton {
-//         id: instance.next_id(),
-//         state: ActionButtonState {
-//             value: "Second".to_string(),
-//             effects: pob2.id,
-//             action: SomeAction::ParagraphOrBold(ParagraphOrBoldAction::ToggleBold),
-//         },
-//     };
-
-//     instance.elements.insert(p.id, SomeElement::Paragraph(p));
-
-//     instance
-//         .elements
-//         .insert(pob.id, SomeElement::ParagraphOrBold(pob));
-//     instance
-//         .elements
-//         .insert(ab.id, SomeElement::ActionButton(ab));
-
-//     instance
-//         .elements
-//         .insert(pob2.id, SomeElement::ParagraphOrBold(pob2));
-//     instance
-//         .elements
-//         .insert(ab2.id, SomeElement::ActionButton(ab2));
-
-//     instance
-// }

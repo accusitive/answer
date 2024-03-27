@@ -1,23 +1,24 @@
+use answer_eas::{elements::Root, instance::SomeAction};
 use serde::{Deserialize, Serialize};
 
-use crate::{
+use answer_eas::{
     element::{Action, Element, ElementId},
     elements::*,
     instance::Instance,
 };
 
 pub fn counter_app() -> Instance {
-    let mut i = Instance::new();
+    let mut instance = Instance::new();
 
     let counter_instances = vec![
-        Counter::new(&mut i),
-        Counter::new(&mut i),
-        Counter::new(&mut i),
-        Counter::new(&mut i),
+        Counter::new(&mut instance),
+        Counter::new(&mut instance),
+        Counter::new(&mut instance),
+        Counter::new(&mut instance),
     ];
 
     let counters = Counters {
-        id: i.next_id(),
+        id: instance.next_id(),
         state: CountersState {
             counters: counter_instances
                 .iter()
@@ -27,17 +28,17 @@ pub fn counter_app() -> Instance {
     };
 
     for counter in counter_instances {
-        i.register_element(counter);
+        instance.register_element(counter);
     }
-    let c = i.register_element(counters);
-    let root = Root {
-        id: i.next_id(),
-        head_chilren: vec![],
-        body_children: vec![c],
-    };
-    i.root = i.register_element(root);
 
-    i
+    let root = Root {
+        id: instance.next_id(),
+        head_chilren: vec![],
+        body_children: vec![instance.register_element(counters)],
+    };
+    instance.root = instance.register_element(root);
+
+    instance
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -134,8 +135,7 @@ impl Element for Counter {
         self.id
     }
 
-    fn update(&mut self, action: Vec<u8>) -> Option<()> {
-        let mut action = self.parse_action(action)?;
+    fn handle_action(&mut self, mut action: SomeAction) -> Option<()> {
         let action = action.as_any().downcast_ref::<CounterAction>()?;
         match action {
             CounterAction::Increment => self.state.count += 1,
@@ -167,8 +167,7 @@ impl Element for Counters {
         self.id
     }
 
-    fn update(&mut self, action: Vec<u8>) -> Option<()> {
-        let mut action = self.parse_action(action)?;
+    fn handle_action(&mut self, mut action: SomeAction) -> Option<()> {
         let action = action.as_any().downcast_mut::<CountersAction>()?;
         match action {
             CountersAction::Reset => todo!(),

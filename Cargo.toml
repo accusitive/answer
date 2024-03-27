@@ -14,3 +14,4 @@ ordered_hashmap = "0.0.3"
 serde = { version = "1.0.197", features = ["derive"] }
 serde_json = "1.0.114"
 typetag = "0.2.16"
+answer_eas ={ path = "./answer_eas" }
